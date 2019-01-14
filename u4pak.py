@@ -517,8 +517,11 @@ class RecordV3(Record):
 		return size
 
 def read_path(stream):
-	path_len, = st_unpack('<I',stream.read(4))
-	return stream.read(path_len).rstrip(b'\0').decode('utf-8').replace('/',os.path.sep)
+	path_len, = st_unpack('<i',stream.read(4))
+	if path_len < 0:
+		return stream.read(-path_len * 2).decode('utf-16-le').replace('/',os.path.sep)
+	else:
+		return stream.read(path_len).rstrip(b'\0').decode('utf-8').replace('/',os.path.sep)
 
 def pack_path(path):
 	path = path.replace(os.path.sep,'/').encode('utf-8') + b'\0'
